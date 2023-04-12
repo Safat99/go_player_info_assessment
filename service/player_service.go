@@ -21,7 +21,7 @@ func (p *PlayerService) Create(c *gin.Context) {
 	err := decoder.Decode(&player)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"eror": err.Error(),
+			"error": err.Error(),
 		})
 		return
 	}
