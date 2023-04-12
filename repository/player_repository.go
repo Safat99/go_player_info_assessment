@@ -54,6 +54,57 @@ func (p *PlayerRepository) FindById(playerId string) (*model.Player, error) {
 	return player, nil
 }
 
+func (p *PlayerRepository) FindByPlayerName(playerName string) ([]bson.M, error) {
+
+	filter := bson.M{"player_name": playerName}
+
+	cursor, err := p.Collection.Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []bson.M
+	if err := cursor.All(context.Background(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func (p *PlayerRepository) FindByCountry(country string) ([]bson.M, error) {
+
+	filter := bson.M{"country": country}
+
+	cursor, err := p.Collection.Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []bson.M
+	if err := cursor.All(context.Background(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func (p *PlayerRepository) FindAll() ([]primitive.M, error) {
+
+	filter := bson.D{{}}
+
+	cursor, err := p.Collection.Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []primitive.M
+	if err := cursor.All(context.Background(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
 func (p *PlayerRepository) UpdatePlayer(playerId string, player *model.UpdatePlayerDto) (*model.Player, error) {
 
 	objId, err := primitive.ObjectIDFromHex(playerId)
@@ -76,4 +127,19 @@ func (p *PlayerRepository) UpdatePlayer(playerId string, player *model.UpdatePla
 		return nil, err
 	}
 	return updatedObject, nil
+}
+
+func (p *PlayerRepository) DeletePlayerById(playerId string) error {
+	objId, err := primitive.ObjectIDFromHex(playerId)
+	if err != nil {
+		return nil
+	}
+
+	filter := bson.M{"_id": objId}
+	_, err = p.Collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
