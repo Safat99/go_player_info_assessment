@@ -26,3 +26,8 @@ type Player struct {
 	CreatedAt  time.Time          `json:"created_at"`
 	UpdatedAt  time.Time          `json:"updated_at"`
 }
+
+type UpdatePlayerDto struct {
+	PlayerName string `json:"player_name,omitempty" bson:"player_name,omitempty"`
+	Position   Pos    `json:"position,omitempty" bson:"position,omitempty"`
+}
