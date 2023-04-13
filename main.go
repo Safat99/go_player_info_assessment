@@ -4,14 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
+	"player_info/config"
+	"player_info/repository"
 	"player_info/routes"
 	"player_info/service"
-	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,44 +16,42 @@ import (
 func main() {
 	fmt.Println("Welcome to the System")
 
-	err := godotenv.Load()
+	// loading configurations
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// initialize the gin router
-	router := gin.Default()
-
-	// initializing the mongo client
-	mongoURI := os.Getenv("MONGO_URI")
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	// fmt.Println(cfg.DBURI)
+	//create client using those configs
+	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.DBURI))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Failed to create client: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
-	defer cancel()
-	err = client.Connect(ctx)
+	// now connect that client
+	err = client.Connect(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	// db := client.Database("player_info")
+	defer client.Disconnect(context.Background())
 
-	//mvc components
-	playerService := &service.PlayerService{}
+	playerRepository := repository.NewPlayerRepository(client, cfg.DBName)
+	playerService := service.NewPlayerService(playerRepository)
 
-	//define routes
-	routes.SetupPlayerRoutes(router, playerService)
+	//set up router and start listening
+	// routes.SetupPlayerRoutes(router, playerService)
+	r := routes.SetupPlayerRouter(playerService)
+	r.Run(":8080")
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	// port := os.Getenv("PORT")
+	// if port == "" {
+	// 	port = "8080"
+	// }
 
-	log.Printf("Server listening on port %s", port)
-	err = http.ListenAndServe(":"+port, router)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// log.Printf("Server listening on port %s", port)
+	// err = http.ListenAndServe(":"+port, router)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 }

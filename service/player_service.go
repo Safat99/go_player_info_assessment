@@ -9,14 +9,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type PlayerService struct{}
+type PlayerService struct {
+	PlayerRepository repository.PlayerRepository
+}
+
+func NewPlayerService(repo repository.PlayerRepository) *PlayerService {
+	return &PlayerService{repo}
+}
 
 func (p *PlayerService) Index(c *gin.Context) {
 	c.JSON(200, "welcome to the app")
 }
 
 func (p *PlayerService) Create(c *gin.Context) {
-	var player *model.Player
+	var player model.Player
 	decoder := json.NewDecoder(c.Request.Body)
 	err := decoder.Decode(&player)
 	if err != nil {
@@ -25,8 +31,7 @@ func (p *PlayerService) Create(c *gin.Context) {
 		})
 		return
 	}
-	playerRepository := &repository.PlayerRepository{}
-	id, err := playerRepository.CreatePlayer(player)
+	id, err := p.PlayerRepository.CreatePlayer(player)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"eror": err.Error(),
@@ -39,10 +44,9 @@ func (p *PlayerService) Create(c *gin.Context) {
 }
 
 func (p *PlayerService) GetByPlayerName(c *gin.Context) {
-	name := c.Param("playerName")
+	name := c.Param("player_name")
 
-	playerRepository := &repository.PlayerRepository{}
-	results, err := playerRepository.FindByPlayerName(name)
+	results, err := p.PlayerRepository.FindByPlayerName(name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"eror": err.Error(),
@@ -55,8 +59,7 @@ func (p *PlayerService) GetByPlayerName(c *gin.Context) {
 func (p *PlayerService) GetByCountry(c *gin.Context) {
 	country := c.Param("country")
 
-	playerRepository := &repository.PlayerRepository{}
-	results, err := playerRepository.FindByCountry(country)
+	results, err := p.PlayerRepository.FindByCountry(country)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"eror": err.Error(),
@@ -69,8 +72,7 @@ func (p *PlayerService) GetByCountry(c *gin.Context) {
 func (p *PlayerService) GetById(c *gin.Context) {
 	id := c.Param("id")
 
-	playerRepository := &repository.PlayerRepository{}
-	player, err := playerRepository.FindById(id)
+	player, err := p.PlayerRepository.FindById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"eror": err.Error(),
@@ -81,8 +83,7 @@ func (p *PlayerService) GetById(c *gin.Context) {
 }
 
 func (p *PlayerService) GetAll(c *gin.Context) {
-	playerRepository := &repository.PlayerRepository{}
-	players, err := playerRepository.FindAll()
+	players, err := p.PlayerRepository.FindAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"eror": err.Error(),
@@ -104,8 +105,7 @@ func (p *PlayerService) UpdatePlayer(c *gin.Context) {
 		return
 	}
 
-	playerRepository := &repository.PlayerRepository{}
-	player, err := playerRepository.UpdatePlayer(id, playerdto)
+	player, err := p.PlayerRepository.UpdatePlayer(id, playerdto)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"eror": err.Error(),
@@ -116,8 +116,7 @@ func (p *PlayerService) UpdatePlayer(c *gin.Context) {
 
 func (p *PlayerService) DeletePlayerById(c *gin.Context) {
 	id := c.Param("id")
-	playerRepository := &repository.PlayerRepository{}
-	err := playerRepository.DeletePlayerById(id)
+	err := p.PlayerRepository.DeletePlayerById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"eror": err.Error(),

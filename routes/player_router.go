@@ -6,12 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupPlayerRoutes(router *gin.Engine, playerService *service.PlayerService) {
-	router.GET("/home", playerService.Index)
-	router.POST("/players/create", playerService.Create)
-	// router.PUT("/players/:id", playerService.UpdatePlayer)
-	// router.DELETE("/players/:id", playerService.DeletePlayerById)
-	// router.GET("/players/:id", playerService.GetById)
-	// router.GET("/players/:playerName", playerService.GetByPlayerName)
-	// router.GET("/players/:country", playerService.GetByCountry)
+// func SetupPlayerRoutes(router *gin.Engine, playerService *service.PlayerService) {
+func SetupPlayerRouter(playerService *service.PlayerService) *gin.Engine {
+	r := gin.Default()
+
+	playerRoutes := r.Group("/players")
+	{
+		playerRoutes.GET("/home", playerService.Index)
+		playerRoutes.POST("/create", playerService.Create)
+		playerRoutes.PUT("/update/:id", playerService.UpdatePlayer)
+		playerRoutes.DELETE("/delete/:id", playerService.DeletePlayerById)
+		playerRoutes.GET("/id/:id", playerService.GetById)
+		playerRoutes.GET("/name/:playerName", playerService.GetByPlayerName)
+		playerRoutes.GET("/all", playerService.GetAll)
+		playerRoutes.GET("/country/:country", playerService.GetByCountry)
+	}
+
+	return r
 }
