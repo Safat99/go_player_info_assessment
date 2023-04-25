@@ -31,7 +31,7 @@ func (u *userRepository) CreateUser(user model.User) (string, error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
-	_, err := p.collection.InsertOne(context.Background(), player)
+	_, err := u.collection.InsertOne(context.Background(), player)
 	if err != nil {
 		log.Fatal(err)
 	}
