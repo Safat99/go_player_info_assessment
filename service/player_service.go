@@ -33,8 +33,10 @@ func ValidateString(input, dob_regex string) bool {
 func (p *PlayerService) Create(c *gin.Context) {
 	var player model.Player
 
-	decoder := json.NewDecoder(c.Request.Body)
-	err := decoder.Decode(&player)
+	// decoder := json.NewDecoder(c.Request.Body)
+	// err := decoder.Decode(&player)
+
+	err := c.ShouldBindJSON(&player)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),

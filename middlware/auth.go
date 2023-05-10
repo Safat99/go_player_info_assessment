@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"player_info/auth"
+	"player_info/repository"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func getUserHandler(c *gin.Context) {
 	}
 
 	// get user from database
-	user = 
+	user, err = repository.UserRepository.FindByUserNameAndRole(,claims.Username, claims.Role)
 
 
 }
